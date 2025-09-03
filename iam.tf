@@ -94,64 +94,6 @@ resource "aws_iam_role_policy" "allowed_secrets" {
   policy = data.aws_iam_policy_document.allowed_secrets[0].json
 }
 
-data "aws_ssm_parameter" "bastion_ssm_parameter" {
-  name = var.settings.bastion_ssm_parameter
-}
-
-data "aws_iam_policy_document" "allowed_ssm_parameterstore" {
-  statement {
-    sid    = "ReadSSMParameters"
-    effect = "Allow"
-    actions = [
-      "ssm:GetParameter",
-      "ssm:GetParameters",
-      "ssm:GetParametersByPath",
-      "ssm:DescribeParameters"
-    ]
-    resources = [
-      data.aws_ssm_parameter.bastion_ssm_parameter.arn
-    ]
-  }
-  # support ssm describe_instance_information && instance_registered
-  statement {
-    sid = "ReadSSMEC2Registration"
-    actions = [
-      "ssm:DescribeInstanceInformation",
-    ]
-    resources = [
-      "*"
-    ]
-  }
-}
-
-resource "aws_iam_role_policy" "allowed_ssm_parameterstore" {
-  name   = "${local.function_name_short}-allow-ssm-parameterstore-policy"
-  role   = aws_iam_role.default_lambda_function.id
-  policy = data.aws_iam_policy_document.allowed_ssm_parameterstore.json
-}
-
-data "aws_iam_policy_document" "allowed_sqs_queues" {
-  statement {
-    sid    = "ReadWriteSQSQueues"
-    effect = "Allow"
-    actions = [
-      "sqs:SendMessage",
-      "sqs:ReceiveMessage",
-      "sqs:DeleteMessage",
-      "sqs:GetQueueAttributes",
-    ]
-    resources = [
-      "arn:aws:sqs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:${local.sqs_queue_name}"
-    ]
-  }
-}
-
-resource "aws_iam_role_policy" "allowed_sqs_queues" {
-  name   = "${local.function_name_short}-allow-sqs-queues-policy"
-  role   = aws_iam_role.default_lambda_function.id
-  policy = data.aws_iam_policy_document.allowed_sqs_queues.json
-}
-
 data "aws_iam_policy_document" "allowed_kms" {
   count = length(try(var.settings.allowed_kms, [])) > 0 ? 1 : 0
   statement {
@@ -214,32 +156,32 @@ resource "aws_iam_role_policy" "vpc_ec2" {
   policy = data.aws_iam_policy_document.vpc_ec2.json
 }
 
-data "aws_iam_policy_document" "eventbridge_scheduler" {
-  version = "2012-10-17"
-  statement {
-    sid    = "EventBridgeSchedulerPermissions"
-    effect = "Allow"
-    actions = [
-      "events:PutRule",
-      "events:DeleteRule",
-      "events:DescribeRule",
-      "events:PutTargets",
-      "events:RemoveTargets",
-      "scheduler:CreateSchedule",
-      "scheduler:DeleteSchedule",
-      "scheduler:UpdateSchedule",
-      "scheduler:GetSchedule",
-      "scheduler:ListSchedules",
-    ]
-    resources = ["*"]
-  }
-}
+# data "aws_iam_policy_document" "eventbridge_scheduler" {
+#   version = "2012-10-17"
+#   statement {
+#     sid    = "EventBridgeSchedulerPermissions"
+#     effect = "Allow"
+#     actions = [
+#       "events:PutRule",
+#       "events:DeleteRule",
+#       "events:DescribeRule",
+#       "events:PutTargets",
+#       "events:RemoveTargets",
+#       "scheduler:CreateSchedule",
+#       "scheduler:DeleteSchedule",
+#       "scheduler:UpdateSchedule",
+#       "scheduler:GetSchedule",
+#       "scheduler:ListSchedules",
+#     ]
+#     resources = ["*"]
+#   }
+# }
 
-resource "aws_iam_role_policy" "eventbridge_scheduler" {
-  name   = "${local.function_name_short}-scheduler-policy"
-  role   = aws_iam_role.default_lambda_function.name
-  policy = data.aws_iam_policy_document.eventbridge_scheduler.json
-}
+# resource "aws_iam_role_policy" "eventbridge_scheduler" {
+#   name   = "${local.function_name_short}-scheduler-policy"
+#   role   = aws_iam_role.default_lambda_function.name
+#   policy = data.aws_iam_policy_document.eventbridge_scheduler.json
+# }
 
 
 data "aws_iam_policy_document" "custom" {
@@ -261,22 +203,22 @@ resource "aws_iam_role_policy" "custom" {
   policy = data.aws_iam_policy_document.custom[0].json
 }
 
-resource "aws_iam_role_policy" "pass_role" {
-  name = "${local.function_name_short}-pass-role-policy"
-  role = aws_iam_role.default_lambda_function.name
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "PassRole"
-        Effect = "Allow"
-        Action = [
-          "iam:PassRole"
-        ]
-        Resource = [
-          aws_iam_role.scheduler_sqs.arn
-        ]
-      }
-    ]
-  })
-}
+# resource "aws_iam_role_policy" "pass_role" {
+#   name = "${local.function_name_short}-pass-role-policy"
+#   role = aws_iam_role.default_lambda_function.name
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Sid    = "PassRole"
+#         Effect = "Allow"
+#         Action = [
+#           "iam:PassRole"
+#         ]
+#         Resource = [
+#           aws_iam_role.scheduler_sqs.arn
+#         ]
+#       }
+#     ]
+#   })
+# }
