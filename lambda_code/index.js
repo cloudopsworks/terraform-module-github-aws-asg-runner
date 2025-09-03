@@ -48,7 +48,7 @@ async function getInstallationOctokit() {
  * @param {Object} context - Lambda context object
  * @returns {Promise<string>} Success message
  */
-module.exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
     console.debug(`Event: ${JSON.stringify(event)}`);
 
     // Initialize Octokit (lazy) in case it is needed later for API calls
