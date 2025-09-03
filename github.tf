@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    time = {
-      source  = "hashicorp/time"
-      version = "0.13.1"
-    }
-  }
-}
 ##
 # (c) 2021-2025
 #     Cloud Ops Works LLC - https://cloudops.works/

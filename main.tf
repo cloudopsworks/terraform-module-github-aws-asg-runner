@@ -61,9 +61,30 @@ resource "aws_lambda_function" "this" {
     aws_cloudwatch_log_group.logs,
     archive_file.lambda_code
   ]
+  layers = [
+    aws_lambda_layer_version.octokit.arn
+  ]
 }
 
 resource "aws_lambda_function_url" "this" {
   function_name      = aws_lambda_function.this.function_name
   authorization_type = "NONE"
+}
+
+resource "terraform_data" "octokit" {
+  input = timestamp()
+  provisioner "local-exec" {
+    command = "mkdir -p ${path.module}/lambda_layers/nodejs/node_modules/ && cd ${path.module}/lambda_layers/nodejs/node_modules && npm install oktokit && zip -r /tmp/octokit-layer.zip ."
+  }
+}
+
+resource "aws_lambda_layer_version" "octokit" {
+  skip_destroy             = true
+  layer_name               = "octokit-layer-${local.system_name_short}"
+  description              = "Lambda Layer for Octokit - ${local.system_name}"
+  filename                 = "/tmp/octokit-layer.zip"
+  license_info             = "Apache-2.0"
+  compatible_runtimes      = ["nodejs20.x", "nodejs22.x"]
+  compatible_architectures = ["x86_64"]
+  depends_on               = [terraform_data.octokit]
 }
