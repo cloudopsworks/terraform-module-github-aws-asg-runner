@@ -77,7 +77,7 @@ resource "terraform_data" "octokit" {
     command = "mkdir -p ${path.module}/lambda_layers/nodejs/node_modules/ && cd ${path.module}/lambda_layers/nodejs/node_modules && npm install @octokit/app @octokit/rest"
   }
   provisioner "local-exec" {
-    command = "cd ${path.module}/lambda_layers/ && zip -r /tmp/octokit-layer.zip nodejs"
+    command = "cd ${path.module}/lambda_layers/ && zip -qr /tmp/octokit-layer.zip nodejs"
   }
   triggers_replace = {
     always_run = timestamp()
