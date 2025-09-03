@@ -33,3 +33,6 @@ tronador/
 
 provider.temp.tf
 .terraform.lock.hcl
+
+# NodeJS lambda code
+node_modules/

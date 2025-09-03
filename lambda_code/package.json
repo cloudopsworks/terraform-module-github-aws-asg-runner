@@ -1,0 +1,17 @@
+{
+  "name": "@cloudopsworks/github-aws-asg-runners",
+  "version": "1.0.0",
+  "description": "Github AWS Autoscaling Group managed Runners",
+  "main": "lambda_function.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "berahac",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@aws-sdk/client-ec2": "^3.880.0",
+    "@aws-sdk/client-secrets-manager": "^3.879.0",
+    "@octokit/app": "^16.1.0",
+    "@octokit/rest": "^22.0.0"
+  }
+}
