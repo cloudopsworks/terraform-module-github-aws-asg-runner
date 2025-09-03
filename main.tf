@@ -74,7 +74,10 @@ resource "aws_lambda_function_url" "this" {
 resource "terraform_data" "octokit" {
   input = timestamp()
   provisioner "local-exec" {
-    command = "mkdir -p ${path.module}/lambda_layers/nodejs/node_modules/ && cd ${path.module}/lambda_layers/nodejs/node_modules && npm install @octokit/app @octokit/rest && zip -r /tmp/octokit-layer.zip ."
+    command = "mkdir -p ${path.module}/lambda_layers/nodejs/node_modules/ && cd ${path.module}/lambda_layers/nodejs/node_modules && npm install @octokit/app @octokit/rest"
+  }
+  provisioner "local-exec" {
+    command = "cd ${path.module}/lambda_layers/ && zip -r /tmp/octokit-layer.zip nodejs"
   }
 }
 
