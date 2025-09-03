@@ -15,6 +15,6 @@
   },
   "dependencies": {
     "@octokit/app": "^16.1.0",
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.0"
   }
 }
