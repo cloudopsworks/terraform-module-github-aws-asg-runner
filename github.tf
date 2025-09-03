@@ -35,11 +35,15 @@ resource "github_actions_runner_group" "this" {
 }
 
 resource "github_organization_webhook" "this" {
+  active = true
+  events = [
+    "workflow_run",
+    "workflow_job",
+  ]
   configuration {
     url          = aws_lambda_function_url.this.function_url
     content_type = "application/json"
     insecure_ssl = false
     secret       = local.secretb64
-    active       = true
   }
 }

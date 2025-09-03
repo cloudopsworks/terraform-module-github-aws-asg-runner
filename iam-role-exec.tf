@@ -50,30 +50,30 @@ resource "aws_iam_role_policy" "lambda_exec" {
   role = aws_iam_role.lambda_exec.id
 }
 
-resource "aws_iam_role" "scheduler_sqs" {
-  name               = "${local.function_name_short}-sched-role"
-  path               = "/"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-  tags               = local.all_tags
-}
+# resource "aws_iam_role" "scheduler_sqs" {
+#   name               = "${local.function_name_short}-sched-role"
+#   path               = "/"
+#   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+#   tags               = local.all_tags
+# }
 
-resource "aws_iam_role_policy" "scheduler_sqs" {
-  role = aws_iam_role.scheduler_sqs.id
-  name = "${local.function_name_short}-sched-sqs-policy"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowSQSToSendMessage"
-        Effect = "Allow"
-        Action = [
-          "sqs:SendMessage",
-          "sqs:SendMessageBatch",
-          "sqs:GetQueueAttributes",
-          "sqs:GetQueueUrl"
-        ]
-        Resource = aws_sqs_queue.this.arn
-      }
-    ]
-  })
-}
+# resource "aws_iam_role_policy" "scheduler_sqs" {
+#   role = aws_iam_role.scheduler_sqs.id
+#   name = "${local.function_name_short}-sched-sqs-policy"
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Sid    = "AllowSQSToSendMessage"
+#         Effect = "Allow"
+#         Action = [
+#           "sqs:SendMessage",
+#           "sqs:SendMessageBatch",
+#           "sqs:GetQueueAttributes",
+#           "sqs:GetQueueUrl"
+#         ]
+#         Resource = aws_sqs_queue.this.arn
+#       }
+#     ]
+#   })
+# }
