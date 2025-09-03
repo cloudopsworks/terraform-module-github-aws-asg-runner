@@ -10,9 +10,9 @@
  *
  * @author berahac
  */
-const { App } = require('@octokit/app');
-const { EC2Client } = require('@aws-sdk/client-ec2');
-const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
+import { App } from '@octokit/app';
+import { EC2Client }  from '@aws-sdk/client-ec2';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 
 // Initialize AWS SDK clients
 const ec2Client = new EC2Client();
