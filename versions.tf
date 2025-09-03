@@ -15,5 +15,21 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.7"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.6"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
