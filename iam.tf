@@ -64,7 +64,6 @@ resource "aws_iam_role_policy" "lambda_function_logs" {
 
 
 data "aws_iam_policy_document" "allowed_secrets" {
-  count = length(try(var.settings.allowed_secrets, [])) > 0 ? 1 : 0
   statement {
     sid    = "ReadListUpdateSecrets"
     effect = "Allow"
@@ -74,7 +73,12 @@ data "aws_iam_policy_document" "allowed_secrets" {
       "secretsmanager:PutSecretValue",
       "secretsmanager:UpdateSecretVersionStage"
     ]
-    resources = var.settings.allowed_secrets
+    resources = concat(
+      [
+        "arn:aws:secretsmanager:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:secret:${local.github_app_secret_name}*"
+      ],
+      try(var.settings.allowed_secrets, [])
+    )
   }
   statement {
     sid    = "RandomPassword"
@@ -88,10 +92,9 @@ data "aws_iam_policy_document" "allowed_secrets" {
 }
 
 resource "aws_iam_role_policy" "allowed_secrets" {
-  count  = length(try(var.settings.allowed_secrets, [])) > 0 ? 1 : 0
   name   = "${local.function_name_short}-allow-secret-policy"
   role   = aws_iam_role.default_lambda_function.name
-  policy = data.aws_iam_policy_document.allowed_secrets[0].json
+  policy = data.aws_iam_policy_document.allowed_secrets.json
 }
 
 data "aws_iam_policy_document" "allowed_kms" {

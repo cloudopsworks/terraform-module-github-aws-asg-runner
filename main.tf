@@ -8,8 +8,9 @@
 #
 
 locals {
-  function_name       = "github-runner-${local.system_name}"
-  function_name_short = "github-runner-${local.system_name_short}"
+  function_name          = "github-runner-${local.system_name}"
+  function_name_short    = "github-runner-${local.system_name_short}"
+  github_app_secret_name = try(var.settings.github_app_secret_name, "/organization/github/app")
   variables = concat(try(var.settings.environment.variables, []),
     [
       {
@@ -18,7 +19,7 @@ locals {
       },
       {
         name  = "GITHUB_APP_SECRET_NAME"
-        value = try(var.settings.github_app_secret_name, "/organization/github/app")
+        value = local.github_app_secret_name
       },
     ],
     [
