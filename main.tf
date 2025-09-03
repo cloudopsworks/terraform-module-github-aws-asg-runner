@@ -37,7 +37,7 @@ resource "aws_lambda_function" "this" {
   description      = try(var.settings.description, "Bastion Access Control Lambda - Region: ${data.aws_region.current.id}")
   role             = aws_iam_role.default_lambda_function.arn
   handler          = "index.handler"
-  runtime          = "nodejs22.x"
+  runtime          = "nodejs20.x"
   package_type     = "Zip"
   filename         = archive_file.lambda_code.output_path
   source_code_hash = archive_file.lambda_code.output_base64sha256
