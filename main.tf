@@ -79,6 +79,9 @@ resource "terraform_data" "octokit" {
   provisioner "local-exec" {
     command = "cd ${path.module}/lambda_layers/ && zip -r /tmp/octokit-layer.zip nodejs"
   }
+  triggers_replace = {
+    always_run = timestamp()
+  }
 }
 
 resource "aws_lambda_layer_version" "octokit" {
