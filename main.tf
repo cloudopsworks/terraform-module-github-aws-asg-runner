@@ -89,7 +89,7 @@ resource "aws_lambda_layer_version" "octokit" {
   layer_name               = "octokit-layer-${local.system_name_short}"
   description              = "Lambda Layer for Octokit - ${local.system_name}"
   filename                 = "/tmp/octokit-layer.zip"
-  source_code_hash         = filebase64sha256("/tmp/octokit-layer.zip")
+  source_code_hash         = base64sha256(terraform_data.octokit.output)
   license_info             = "Apache-2.0"
   compatible_runtimes      = ["nodejs20.x", "nodejs22.x"]
   compatible_architectures = ["x86_64"]
