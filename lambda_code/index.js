@@ -34,7 +34,7 @@ async function getInstallationOctokit() {
 
     const app = new App({
         appId: creds.id,
-        privateKey: Buffer.from(creds.private_key, 'base64').toString('utf8'),
+        privateKey: Buffer.from(creds.pem_base64, 'base64').toString('utf8'),
     });
 
     cachedOctokit = await app.getInstallationOctokit(creds.installation_id);
