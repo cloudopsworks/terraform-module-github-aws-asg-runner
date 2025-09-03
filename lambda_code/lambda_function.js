@@ -10,37 +10,36 @@
  *
  * @author berahac
  */
-const oktokit = require('@octokit/rest');
-const octokitApp = require('@octokit/app');
-const ec2 = require('@aws-sdk/client-ec2');
-const secrets = require('@aws-sdk/client-secrets-manager');
+const { App } = require('@octokit/app');
+const { EC2Client } = require('@aws-sdk/client-ec2');
+const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
 
-// Initialize EC2 client
-const ec2Client = new ec2.EC2Client();
-const secretsClient = new secrets.SecretsManagerClient();
-const secretName = process.env.get('GITHUB_APP_SECRET_NAME', 'github_app_credentials');
+// Initialize AWS SDK clients
+const ec2Client = new EC2Client();
+const secretsClient = new SecretsManagerClient();
+const secretName = process.env.GITHUB_APP_SECRET_NAME || 'github_app_credentials';
 
 console.log(`Github App Secret Name: ${secretName}`);
 
-// retrieve github app credentials from secrets manager
-const ghappCredentials = async(secretName) => {
-    const command = new secrets.GetSecretValueCommand({ SecretId: secretName });
+// Lazy initializer for GitHub App installation client
+let cachedOctokit = null;
+async function getInstallationOctokit() {
+    if (cachedOctokit) return cachedOctokit;
+
+    const command = new GetSecretValueCommand({ SecretId: secretName });
     const response = await secretsClient.send(command);
-    return JSON.parse(response.SecretString);
+    const creds = JSON.parse(response.SecretString);
+
+    console.log(`Retrieved GitHub App: ID=${creds.id} , Installation ID=${creds.installation_id} , PrivateKey=<<REDACTED>>`);
+
+    const app = new App({
+        appId: creds.id,
+        privateKey: Buffer.from(creds.private_key, 'base64').toString('utf8'),
+    });
+
+    cachedOctokit = await app.getInstallationOctokit(creds.installation_id);
+    return cachedOctokit;
 }
-
-const secret = await getSecret(secretName);
-console.log(`Retrieved GitHub App: ID=${secret.id} , Installation ID=${secret.installation_id} , PrivateKey=<<REDACTED>>`);
-// Initialize octokit with app authentication
-// async initialization of octokit with app authentication
-// the appid, and private key are stored in secrets manager, privatekey comes base64 encoded
-const octoapp = await octokitApp({
-    appId: ghappCredentials.id,
-    installationId: ghappCredentials.installation_id,
-    privateKey: Buffer.from(ghappCredentials.private_key, 'base64').toString('utf8'),
-});
-
-const octokit = await octoapp.getInstallationOctokit(ghappCredentials.installation_id);
 
 /**
  * Lambda handler for processing GitHub Webhooks events
@@ -49,10 +48,19 @@ const octokit = await octoapp.getInstallationOctokit(ghappCredentials.installati
  * @param {Object} context - Lambda context object
  * @returns {Promise<string>} Success message
  */
-export const handler = async(event, context) => {
+module.exports.handler = async (event, context) => {
     console.debug(`Event: ${JSON.stringify(event)}`);
-    let response = {
+
+    // Initialize Octokit (lazy) in case it is needed later for API calls
+    try {
+        await getInstallationOctokit();
+    } catch (err) {
+        console.error('Failed to initialize GitHub App client:', err);
+        // Do not fail the entire request unless required; adjust as needed
+    }
+
+    const response = {
         message: 'Success'
     };
     return JSON.stringify(response);
-}
+};
