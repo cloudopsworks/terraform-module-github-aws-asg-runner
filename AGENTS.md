@@ -66,12 +66,33 @@ This document provides instructions for AI Agents working with the implementatio
 
 ## Versioning Management
 
-Module versioning follows the [GitFlow way of work](https://cloudopsworks.co/resources/gitflow-way-of-work/). Use `make` targets whenever available for branch and release operations.
+Module versioning follows a feature-based development process branching directly from `master`. Use `make` targets whenever available for branch and release operations.
 
 ### General Rules
 
-- **Never push directly to `master`**. All changes must flow through feature, hotfix, or release branches and be merged via pull requests.
+- **Never push directly to `master`**. All changes must flow through feature or hotfix branches and be merged via pull requests.
 - Follow [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`) for all module tags.
+- There is no `develop` branch — feature branches are created from and merged back into `master`.
+
+### New Module Features and Provider Version Upgrades
+
+All new features and provider version upgrades branch directly from `master` using the no-develop targets:
+
+1. Create a feature branch from `master`:
+   ```sh
+   make gitflow/feature/start-no-develop:<feature-name>
+   ```
+2. Implement changes and validate:
+   ```sh
+   make fmt
+   make lint
+   ```
+3. Finish the feature — this merges it back into `master` via pull request:
+   ```sh
+   make gitflow/feature/finish-no-develop:<feature-name>
+   ```
+
+For provider upgrades, increment the semver digit accordingly: **MAJOR** for breaking provider changes (e.g., AWS `4.x` → `5.x`), **MINOR** for backwards-compatible upgrades.
 
 ### Workflow Version Upgrades (Minor or Major)
 
@@ -86,50 +107,20 @@ Upgrades to the GitFlow workflow version itself — whether minor or major — a
    make gitflow/hotfix/publish
    ```
 3. Apply the workflow version changes on the hotfix branch.
-4. Finish the hotfix — this merges it into both `master` and `develop`:
+4. Finish the hotfix — this merges it into `master`:
    ```sh
    make gitflow/hotfix/finish
    ```
-5. If the `make` target is not available, merge manually using `git merge`:
-   ```sh
-   git checkout develop
-   git merge --no-ff hotfix/<hotfix-name>
-   ```
-6. Hotfix changes **must always be back-merged into `develop`** to keep branches in sync.
-
-### Provider Version Upgrades (Major)
-
-Upgrading a module to a new **major** version of a Terraform provider (e.g., AWS provider `4.x` → `5.x`) constitutes a **release**:
-
-1. Create a release branch from `develop`:
-   ```sh
-   make gitflow/release/start
-   ```
-2. Publish the release branch to the remote:
-   ```sh
-   make gitflow/release/publish
-   ```
-3. Update `versions.tf` with the new provider version constraints and make any required compatibility changes.
-4. Validate and format the module:
-   ```sh
-   make fmt
-   make lint
-   ```
-5. Finish the release — this merges it into `master` and `develop` and creates the version tag:
-   ```sh
-   make gitflow/release/finish
-   ```
-6. Increment the **MAJOR** semver digit for breaking provider changes; increment **MINOR** for backwards-compatible provider upgrades.
 
 ### Summary Table
 
-| Change Type                          | Branch Type | Merges Into              | Semver Impact |
-|--------------------------------------|-------------|--------------------------|---------------|
-| Workflow version upgrade (minor/major) | `hotfix`  | `master` + `develop`     | PATCH / MINOR |
-| Provider major version upgrade       | `release`   | `master` + `develop`     | MAJOR         |
-| Provider minor/patch version upgrade | `release`   | `master` + `develop`     | MINOR / PATCH |
-| New module feature                   | `feature`   | `develop`                | MINOR         |
-| Bug fix                              | `hotfix`    | `master` + `develop`     | PATCH         |
+| Change Type                              | Branch Type | Merges Into | Semver Impact |
+|------------------------------------------|-------------|-------------|---------------|
+| Workflow version upgrade (minor/major)   | `hotfix`    | `master`    | PATCH / MINOR |
+| Provider major version upgrade           | `feature`   | `master`    | MAJOR         |
+| Provider minor/patch version upgrade     | `feature`   | `master`    | MINOR / PATCH |
+| New module feature                       | `feature`   | `master`    | MINOR         |
+| Bug fix                                  | `hotfix`    | `master`    | PATCH         |
 
 
 ## Documentation Guidelines
