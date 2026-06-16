@@ -20,6 +20,10 @@ on:
   schedule:
     - cron:  '0 0 * * *'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -36,11 +40,10 @@ jobs:
           make readme
       # Create a PR only if not on a pull request event (to avoid error)
       - name: Create Pull Request
-        uses: cloudopsworks/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v8
         if: (github.event_name != 'pull_request')
         with:
           labels: automated pr
-        env:
           token: ${{ secrets.BOT_TOKEN }}
           commit-message: Update README.md
           title: Automatic Update of README.md
